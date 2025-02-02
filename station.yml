@@ -1,0 +1,103 @@
+# vim:ft=yaml.ansible
+#
+# Install ansible with `sudo apt install ansible-core`
+# For some reason just installing `ansible` caused missing dependencies with
+# community.general.npm.
+
+- name: Playbook for setting up Ubuntu based workstation
+  hosts: localhost
+  become: false
+  vars:
+    dotfiles_dir: "{{ lookup('env', 'HOME') }}/Development/dotfiles"
+    xdg_config_dir: "{{ lookup('env', 'HOME') }}/.config"
+  tasks:
+    - name: Install base packages
+      become: true
+      ansible.builtin.apt:
+        name:
+          [
+            "bat",
+            "btop",
+            "docker",
+            "git",
+            "htop",
+            "httpie",
+            "jq",
+            "ripgrep",
+            "stow",
+            "tree",
+          ]
+
+    # Must ssh-add your github ssh key first to unlock it with password
+    - name: Clone dotfiles
+      ansible.builtin.git:
+        dest: ~/Development/dotfiles
+        repo: git@github.com:ryanhouston/dotfiles.git
+        version: master
+      notify: Install dotfiles
+
+    # Must ssh-add your github ssh key first to unlock it with password
+    - name: Clone NeoVim config
+      ansible.builtin.git:
+        repo: git@github.com:ryanhouston/dotfiles-neovim.git
+        dest: "{{ xdg_config_dir }}/lazyvim"
+        version: main
+
+    - name: Add tldr man packages
+      community.general.npm:
+        name: tldr
+        global: true
+
+    # Packages:
+    # - asdf version manager
+    # - fzf
+    # - gh - https://github.com/compscidr/ansible-github-cli/blob/main/roles/github_cli/tasks/main.yml
+    # - ghostty
+    # - neovim - latest
+    # - NerdFonts
+    # - scc - better cloc - https://github.com/boyter/scc?tab=readme-ov-file#install
+    # - tmux - latest
+    # - zsh + ohmyzsh
+    # Apps
+    # - Chrome
+    # - 1Password
+    # - Dropbox (replace with SyncThing)
+    # - Obsidian
+
+    # DOCKER -------------------
+
+    - name: Add Docker GPG apt Key
+      become: true
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker Repository
+      become: true
+      ansible.builtin.apt_repository:
+        repo: deb https://download.docker.com/linux/ubuntu jammy stable
+        state: present
+
+    - name: Update apt and install docker-ce
+      become: true
+      ansible.builtin.apt:
+        name: docker-ce
+        state: present
+        update_cache: true
+
+    - name: Add docker user group
+      ansible.builtin.group:
+        name: docker
+        state: present
+
+    - name: Add user to docker group
+      become: true
+      ansible.builtin.user:
+        append: true
+        groups: [docker]
+        name: "{{ ansible_user_id }}"
+  handlers:
+    - name: Install dotfiles
+      ansible.builtin.command:
+        cmd: ~/Development/dotfiles/install.sh
+      changed_when: true
