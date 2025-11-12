@@ -18,14 +18,16 @@
           [
             "bat",
             "btop",
-            "docker",
+            "gh",
             "git",
             "htop",
             "httpie",
             "jq",
             "ripgrep",
             "stow",
+            "tmux",
             "tree",
+            "zsh",
           ]
 
     # Must ssh-add your github ssh key first to unlock it with password
@@ -49,14 +51,12 @@
         global: true
 
     # Packages:
-    # - asdf version manager
+    # - asdf version manager - nodejs, golang, python default versions
     # - fzf
     # - gh - https://github.com/compscidr/ansible-github-cli/blob/main/roles/github_cli/tasks/main.yml
     # - ghostty
     # - neovim - latest
-    # - NerdFonts
     # - scc - better cloc - https://github.com/boyter/scc?tab=readme-ov-file#install
-    # - tmux - latest
     # - zsh + ohmyzsh
     # Apps
     # - Chrome
