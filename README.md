@@ -40,3 +40,8 @@ sync with the station config.
 ```sh
 ansible-playbook --ask-become-pass station.yml`
 ```
+
+> [!WARNING] If fingerprint reader authentication is enabled you may experience
+> ansible hanging when running commands. If this happens, disable fingerprint
+> authentication temporarily with `sudo pam-auth-update --disable fingerprint`
+> and re-enable it later with `sudo pam-auth-update --enable fingerprint`.
